@@ -5,6 +5,7 @@ A small Windows desktop client for [Hablix](https://hablix.org/client) with auto
 ## Features
 
 - Loads Hablix in a dedicated desktop window and keeps the login session between launches.
+- Shows a branded boot splash using the Hablix login-page artwork while the hotel loads.
 - Connects automatically to the locally running Discord desktop app through the Hablix RPC application (`1553805351479017632`).
 - Displays the registered `hablix-large` artwork asset on every activity.
 - Updates the activity for signing in, loading, visiting rooms, browsing the navigator or catalog, checking inventory, chatting with friends, changing outfits, and being away.

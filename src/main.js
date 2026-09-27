@@ -5,7 +5,13 @@ const { isAllowedHablixUrl, isSafeExternalUrl } = require('./navigation');
 const { PresenceManager } = require('./presence');
 
 const HABLIX_URL = 'https://hablix.org/client';
+const MIN_SPLASH_TIME_MS = 1_600;
+const MAX_SPLASH_TIME_MS = 15_000;
 let mainWindow;
+let splashWindow;
+let splashStartedAt = 0;
+let splashFallbackTimer;
+let revealScheduled = false;
 let activityTracker;
 const presence = new PresenceManager();
 
@@ -39,7 +45,51 @@ function applyNavigationPolicy(window) {
   });
 }
 
+function createSplashWindow() {
+  splashStartedAt = Date.now();
+  revealScheduled = false;
+  splashWindow = new BrowserWindow({
+    width: 540,
+    height: 350,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    movable: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    center: true,
+    show: false,
+    hasShadow: true,
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    webPreferences: secureWebPreferences()
+  });
+
+  splashWindow.once('ready-to-show', () => splashWindow?.show());
+  splashWindow.on('closed', () => { splashWindow = null; });
+  void splashWindow.loadFile(path.join(__dirname, 'splash.html'));
+
+  clearTimeout(splashFallbackTimer);
+  splashFallbackTimer = setTimeout(revealMainWindow, MAX_SPLASH_TIME_MS);
+}
+
+function revealMainWindow() {
+  if (revealScheduled) return;
+  revealScheduled = true;
+  const remaining = Math.max(0, MIN_SPLASH_TIME_MS - (Date.now() - splashStartedAt));
+
+  setTimeout(() => {
+    clearTimeout(splashFallbackTimer);
+    splashFallbackTimer = null;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close();
+  }, remaining);
+}
+
 function createMainWindow() {
+  createSplashWindow();
   mainWindow = new BrowserWindow({
     title: 'Hablix Desktop',
     width: 1280,
@@ -55,11 +105,19 @@ function createMainWindow() {
   applyNavigationPolicy(mainWindow);
   activityTracker = new ActivityTracker(mainWindow, presence);
   activityTracker.start();
-  mainWindow.once('ready-to-show', () => mainWindow.show());
+  mainWindow.webContents.on('did-frame-finish-load', (_event, isMainFrame) => {
+    if (isMainFrame) revealMainWindow();
+  });
+  mainWindow.webContents.on('did-fail-load', (_event, _code, _description, _url, isMainFrame) => {
+    if (isMainFrame) revealMainWindow();
+  });
   mainWindow.webContents.on('render-process-gone', () => {
     if (mainWindow && !mainWindow.isDestroyed()) void mainWindow.loadURL(HABLIX_URL);
   });
   mainWindow.on('closed', () => {
+    clearTimeout(splashFallbackTimer);
+    splashFallbackTimer = null;
+    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close();
     activityTracker?.stop();
     activityTracker = null;
     mainWindow = null;
