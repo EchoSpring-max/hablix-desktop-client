@@ -2,14 +2,17 @@ const DOM_PROBE = `(() => {
   const roomKey = '__hablixDesktopRoomName';
 
   const captureRoomName = () => {
-    const roomTools = document.querySelector('.nitro-room-tools-container');
-    if (!roomTools) {
+    const isInRoom = Boolean(document.querySelector(
+      '.navigation-item.icon.icon-habbo, .nitro-room-tools-container'
+    ));
+    if (!isInRoom) {
       window[roomKey] = '';
       return;
     }
 
     const roomNameElement = document.querySelector(
-      '.nitro-room-tools-info .fs-4, .nitro-room-tools-info [class*="room-name"]'
+      '.nitro-room-tools-info .fs-4, .nitro-room-tools-info [class*="room-name"], ' +
+      '.nitro-room-info .icon-house-small + *'
     );
     const roomInfo = document.querySelector('.nitro-room-tools-info');
     const rawText = roomNameElement?.textContent || roomInfo?.textContent || '';
@@ -23,8 +26,8 @@ const DOM_PROBE = `(() => {
       childList: true,
       subtree: true
     });
-    captureRoomName();
   }
+  captureRoomName();
 
   return {
     url: location.href,
@@ -46,6 +49,21 @@ const DOM_PROBE = `(() => {
 function cleanRoomName(value) {
   if (typeof value !== 'string') return '';
   return value.trim().replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 96);
+}
+
+function combinePageStates(states = []) {
+  const validStates = states.filter(state => state && typeof state === 'object');
+  const roomState = validStates.find(state => cleanRoomName(state.roomName));
+  const clientState = roomState || validStates.find(state => state.hasHotelClient) || validStates[0] || {};
+  const hasHotelClient = validStates.some(state => state.hasHotelClient === true);
+
+  return {
+    ...clientState,
+    hasHotelClient,
+    hasStaffAccess: validStates.some(state => state.hasStaffAccess === true),
+    isLogin: !hasHotelClient && validStates.some(state => state.isLogin === true),
+    roomName: cleanRoomName(roomState?.roomName || '')
+  };
 }
 
 function deriveActivity(snapshot = {}) {
@@ -122,7 +140,14 @@ class ActivityTracker {
     let pageState = {};
     if (!this.isLoading) {
       try {
-        pageState = await this.window.webContents.executeJavaScript(DOM_PROBE, true);
+        const frames = this.window.webContents.mainFrame.framesInSubtree
+          .filter(frame => !frame.detached);
+        const results = await Promise.allSettled(
+          frames.map(frame => frame.executeJavaScript(DOM_PROBE, true))
+        );
+        pageState = combinePageStates(
+          results.filter(result => result.status === 'fulfilled').map(result => result.value)
+        );
       } catch {
         pageState = {};
       }
@@ -147,4 +172,4 @@ class ActivityTracker {
   }
 }
 
-module.exports = { ActivityTracker, DOM_PROBE, cleanRoomName, deriveActivity };
+module.exports = { ActivityTracker, DOM_PROBE, cleanRoomName, combinePageStates, deriveActivity };

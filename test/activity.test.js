@@ -1,10 +1,23 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { DOM_PROBE, cleanRoomName, deriveActivity } = require('../src/activity');
+const { DOM_PROBE, cleanRoomName, combinePageStates, deriveActivity } = require('../src/activity');
 
 test('room-name page probe remains valid JavaScript', () => {
   assert.doesNotThrow(() => new Function(DOM_PROBE));
   assert.match(DOM_PROBE, /textContent/);
+});
+
+test('combines the room name from an embedded Nitro client frame', () => {
+  assert.deepEqual(combinePageStates([
+    { isLogin: false, hasHotelClient: false, roomName: '' },
+    { hasHotelClient: true, hasStaffAccess: true, roomName: 'My Room', panel: '' }
+  ]), {
+    hasHotelClient: true,
+    hasStaffAccess: true,
+    isLogin: false,
+    roomName: 'My Room',
+    panel: ''
+  });
 });
 
 test('reports the login screen as the front desk', () => {
