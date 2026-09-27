@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DEFAULTS = Object.freeze({
-  clientId: '',
+  clientId: '1553805351479017632',
   details: 'Exploring Hablix',
   state: 'In the hotel',
   largeImageKey: '',

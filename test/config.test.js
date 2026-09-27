@@ -1,6 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeConfig } = require('../src/config');
+const { DEFAULTS, normalizeConfig } = require('../src/config');
+
+test('ships with the configured Hablix Discord Application ID', () => {
+  assert.equal(DEFAULTS.clientId, '1553805351479017632');
+});
 
 test('normalizes a valid settings object', () => {
   const config = normalizeConfig({
