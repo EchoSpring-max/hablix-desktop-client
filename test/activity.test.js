@@ -1,6 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { cleanRoomName, deriveActivity } = require('../src/activity');
+const { DOM_PROBE, cleanRoomName, deriveActivity } = require('../src/activity');
+
+test('room-name page probe remains valid JavaScript', () => {
+  assert.doesNotThrow(() => new Function(DOM_PROBE));
+  assert.match(DOM_PROBE, /textContent/);
+});
 
 test('reports the login screen as the front desk', () => {
   assert.deepEqual(deriveActivity({ isFocused: true, isLogin: true }), {
@@ -34,9 +39,20 @@ test('reports room exploration when no panel is open', () => {
     hasHotelClient: true,
     roomName: 'Pool'
   }), {
-    details: 'Exploring a room',
-    state: 'Pool'
+    details: 'In Pool',
+    state: 'Playing Hablix'
   });
+});
+
+test('room activity names the room instead of using the generic hotel status', () => {
+  const activity = deriveActivity({
+    isFocused: true,
+    hasHotelClient: true,
+    roomName: 'Welcome Lounge'
+  });
+
+  assert.equal(activity.details, 'In Welcome Lounge');
+  assert.notEqual(activity.state, 'Exploring the hotel');
 });
 
 test('reports background windows as away', () => {

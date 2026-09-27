@@ -2,9 +2,18 @@ const DOM_PROBE = `(() => {
   const roomKey = '__hablixDesktopRoomName';
 
   const captureRoomName = () => {
+    const roomTools = document.querySelector('.nitro-room-tools-container');
+    if (!roomTools) {
+      window[roomKey] = '';
+      return;
+    }
+
+    const roomNameElement = document.querySelector(
+      '.nitro-room-tools-info .fs-4, .nitro-room-tools-info [class*="room-name"]'
+    );
     const roomInfo = document.querySelector('.nitro-room-tools-info');
-    if (!roomInfo) return;
-    const firstLine = (roomInfo.innerText || '').split('\\n')[0].trim();
+    const rawText = roomNameElement?.textContent || roomInfo?.textContent || '';
+    const firstLine = rawText.split(/\\r?\\n/)[0].trim();
     if (firstLine && firstLine.length <= 128) window[roomKey] = firstLine;
   };
 
@@ -69,7 +78,7 @@ function deriveActivity(snapshot = {}) {
   }
 
   if (roomName) {
-    return { details: 'Exploring a room', state: roomName };
+    return { details: `In ${roomName}`, state: 'Playing Hablix' };
   }
 
   if (snapshot.hasHotelClient) {
@@ -103,7 +112,7 @@ class ActivityTracker {
     this.window.webContents.on('did-navigate-in-page', () => void this.refresh());
     this.window.on('focus', () => void this.refresh());
     this.window.on('blur', () => void this.refresh());
-    this.timer = setInterval(() => void this.refresh(), 5_000);
+    this.timer = setInterval(() => void this.refresh(), 2_000);
     void this.refresh();
   }
 
@@ -138,4 +147,4 @@ class ActivityTracker {
   }
 }
 
-module.exports = { ActivityTracker, cleanRoomName, deriveActivity };
+module.exports = { ActivityTracker, DOM_PROBE, cleanRoomName, deriveActivity };
