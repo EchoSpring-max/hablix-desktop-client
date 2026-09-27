@@ -1,13 +1,12 @@
 const path = require('node:path');
-const { app, BrowserWindow, ipcMain, Menu, session, shell } = require('electron');
-const { ConfigStore } = require('./config');
+const { app, BrowserWindow, Menu, session, shell } = require('electron');
+const { ActivityTracker } = require('./activity');
 const { isAllowedHablixUrl, isSafeExternalUrl } = require('./navigation');
 const { PresenceManager } = require('./presence');
 
 const HABLIX_URL = 'https://hablix.org/client';
 let mainWindow;
-let settingsWindow;
-let configStore;
+let activityTracker;
 const presence = new PresenceManager();
 
 function secureWebPreferences(extra = {}) {
@@ -54,44 +53,26 @@ function createMainWindow() {
   });
 
   applyNavigationPolicy(mainWindow);
+  activityTracker = new ActivityTracker(mainWindow, presence);
+  activityTracker.start();
   mainWindow.once('ready-to-show', () => mainWindow.show());
   mainWindow.webContents.on('render-process-gone', () => {
-    if (!mainWindow.isDestroyed()) void mainWindow.loadURL(HABLIX_URL);
+    if (mainWindow && !mainWindow.isDestroyed()) void mainWindow.loadURL(HABLIX_URL);
+  });
+  mainWindow.on('closed', () => {
+    activityTracker?.stop();
+    activityTracker = null;
+    mainWindow = null;
   });
   void mainWindow.loadURL(HABLIX_URL);
-}
-
-function openSettings() {
-  if (settingsWindow && !settingsWindow.isDestroyed()) {
-    settingsWindow.focus();
-    return;
-  }
-
-  settingsWindow = new BrowserWindow({
-    title: 'Discord Rich Presence',
-    parent: mainWindow,
-    modal: true,
-    width: 580,
-    height: 720,
-    minWidth: 520,
-    minHeight: 640,
-    resizable: true,
-    backgroundColor: '#111827',
-    webPreferences: secureWebPreferences({
-      preload: path.join(__dirname, 'preload.js')
-    })
-  });
-  settingsWindow.removeMenu();
-  settingsWindow.on('closed', () => { settingsWindow = null; });
-  void settingsWindow.loadFile(path.join(__dirname, 'settings.html'));
 }
 
 function buildMenu() {
   return Menu.buildFromTemplate([
     {
-      label: 'Settings',
+      label: 'Hablix',
       submenu: [
-        { label: 'Discord Rich Presence', accelerator: 'CmdOrCtrl+,', click: openSettings },
+        { label: 'Reload Hotel', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.reload() },
         { type: 'separator' },
         { role: 'quit' }
       ]
@@ -112,26 +93,14 @@ function buildMenu() {
   ]);
 }
 
-app.whenReady().then(async () => {
-  configStore = new ConfigStore(app.getPath('userData'));
-
+app.whenReady().then(() => {
   session.fromPartition('persist:hablix').setPermissionRequestHandler((_webContents, _permission, callback) => {
     callback(false);
   });
 
-  ipcMain.handle('settings:get', () => configStore.load());
-  ipcMain.handle('settings:save', async (_event, input) => {
-    const config = configStore.save(input);
-    await presence.configure(config);
-    return config;
-  });
-  ipcMain.on('settings:close', () => settingsWindow?.close());
-
   Menu.setApplicationMenu(buildMenu());
   createMainWindow();
-  const config = configStore.load();
-  await presence.configure(config);
-  if (!config.clientId) openSettings();
+  void presence.start();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
