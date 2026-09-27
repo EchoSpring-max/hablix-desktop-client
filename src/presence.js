@@ -1,6 +1,7 @@
 const RPC = require('discord-rpc');
 
 const CLIENT_ID = '1553805351479017632';
+const LARGE_IMAGE_KEY = 'hablix-large';
 const DEFAULT_ACTIVITY = Object.freeze({
   details: 'Starting Hablix',
   state: 'Entering the hotel'
@@ -68,6 +69,8 @@ class PresenceManager {
       details: activity.details,
       state: activity.state,
       startTimestamp: this.startedAt,
+      largeImageKey: LARGE_IMAGE_KEY,
+      largeImageText: 'Hablix',
       instance: false,
       buttons: [{ label: 'Play Hablix', url: 'https://hablix.org/client' }]
     };
@@ -116,4 +119,4 @@ class PresenceManager {
   }
 }
 
-module.exports = { CLIENT_ID, DEFAULT_ACTIVITY, PresenceManager };
+module.exports = { CLIENT_ID, DEFAULT_ACTIVITY, LARGE_IMAGE_KEY, PresenceManager };
