@@ -1,6 +1,6 @@
 {
   "name": "hablix-desktop",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A focused desktop client for Hablix with automatic Discord Rich Presence.",
   "main": "src/main.js",
   "author": "Hablix Desktop contributors",
@@ -12,7 +12,7 @@
     "dist": "npm run dist:win",
     "dist:win": "electron-builder --win nsis portable",
     "icon:mac": "bash scripts/create-mac-icon.sh",
-    "dist:mac": "npm run icon:mac && electron-builder --mac"
+    "dist:mac": "npm run icon:mac && electron-builder --mac --publish never"
   },
   "dependencies": {
     "discord-rpc": "4.0.1"

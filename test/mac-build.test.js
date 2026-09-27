@@ -7,6 +7,7 @@ const packageJson = require('../package.json');
 const root = path.join(__dirname, '..');
 
 test('macOS build produces universal DMG and ZIP packages', () => {
+  assert.match(packageJson.scripts['dist:mac'], /--publish never/);
   assert.equal(packageJson.build.mac.icon, 'build/icon.icns');
   assert.equal(packageJson.build.mac.minimumSystemVersion, '11.0');
   assert.deepEqual(packageJson.build.mac.target.map(target => target.target), ['dmg', 'zip']);
