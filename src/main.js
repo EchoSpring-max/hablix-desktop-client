@@ -192,38 +192,38 @@ function buildMenu() {
       ]
     },
     {
-      label: 'Quick Access',
+      label: 'User Commands',
       submenu: [
-        { label: 'Navigator', accelerator: 'CmdOrCtrl+Shift+N', click: () => void runUserAction('navigator') },
-        { label: 'Catalog', accelerator: 'CmdOrCtrl+Shift+C', click: () => void runUserAction('catalog') },
-        { label: 'Inventory', accelerator: 'CmdOrCtrl+Shift+B', click: () => void runUserAction('inventory') },
-        { label: 'Friends', accelerator: 'CmdOrCtrl+Shift+F', click: () => void runUserAction('friends') },
-        { label: 'Messages', click: () => void runUserAction('messages') },
-        { label: 'Camera', click: () => void runUserAction('camera') },
-        { type: 'separator' },
         {
-          label: 'Room Commands',
+          label: 'Quick Access',
           submenu: [
-            { label: 'Wave (o/)', click: () => void runUserAction('wave') },
-            { label: 'Go Idle (:idle)', click: () => void runUserAction('idle') },
-            { label: 'Respect User (_b)', click: () => void runUserAction('respect') },
-            { label: 'Flip Room (:flip)', click: () => void runUserAction('flip') },
-            { label: 'Set Zoom (:zoom)', click: () => void runUserAction('zoom') },
-            { label: 'Hold Sign (:sign)', click: () => void runUserAction('sign') },
-            { type: 'separator' },
-            { label: 'Furniture Chooser (:furni)', click: () => void runUserAction('furnitureChooser') },
-            { label: 'User Chooser (:chooser)', click: () => void runUserAction('userChooser') },
-            { label: 'Toggle FPS (:togglefps)', click: () => void runUserAction('toggleFps') },
-            { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') }
+            { label: 'Navigator', accelerator: 'CmdOrCtrl+Shift+N', click: () => void runUserAction('navigator') },
+            { label: 'Catalog', accelerator: 'CmdOrCtrl+Shift+C', click: () => void runUserAction('catalog') },
+            { label: 'Inventory', accelerator: 'CmdOrCtrl+Shift+B', click: () => void runUserAction('inventory') },
+            { label: 'Friends', accelerator: 'CmdOrCtrl+Shift+F', click: () => void runUserAction('friends') },
+            { label: 'Messages', click: () => void runUserAction('messages') },
+            { label: 'Camera', click: () => void runUserAction('camera') }
           ]
-        }
+        },
+        { type: 'separator' },
+        { label: 'Wave (o/)', click: () => void runUserAction('wave') },
+        { label: 'Go Idle (:idle)', click: () => void runUserAction('idle') },
+        { label: 'Respect User (_b)', click: () => void runUserAction('respect') },
+        { label: 'Flip Room (:flip)', click: () => void runUserAction('flip') },
+        { label: 'Set Zoom (:zoom)', click: () => void runUserAction('zoom') },
+        { label: 'Hold Sign (:sign)', click: () => void runUserAction('sign') },
+        { type: 'separator' },
+        { label: 'Furniture Chooser (:furni)', click: () => void runUserAction('furnitureChooser') },
+        { label: 'User Chooser (:chooser)', click: () => void runUserAction('userChooser') },
+        { label: 'Toggle FPS (:togglefps)', click: () => void runUserAction('toggleFps') },
+        { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') }
       ]
     }
   ];
 
   if (hasStaffAccess) {
     template.push({
-      label: 'Staff',
+      label: 'Admin Commands',
       submenu: [
         { label: 'Toggle Mod Tools', accelerator: 'CmdOrCtrl+Shift+M', click: () => void runStaffAction('toggle') },
         { type: 'separator' },
