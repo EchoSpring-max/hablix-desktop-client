@@ -100,7 +100,7 @@ function deriveActivity(snapshot = {}) {
   }
 
   if (snapshot.hasHotelClient) {
-    return { details: 'Playing Hablix', state: 'Exploring the hotel' };
+    return { details: 'Playing Hablix', state: 'Exploring a hotel' };
   }
 
   return { details: 'Visiting Hablix', state: 'At the hotel' };

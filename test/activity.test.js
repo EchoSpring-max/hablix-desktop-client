@@ -68,6 +68,13 @@ test('room activity names the room instead of using the generic hotel status', (
   assert.notEqual(activity.state, 'Exploring the hotel');
 });
 
+test('generic client activity says exploring a hotel', () => {
+  assert.deepEqual(deriveActivity({ isFocused: true, hasHotelClient: true }), {
+    details: 'Playing Hablix',
+    state: 'Exploring a hotel'
+  });
+});
+
 test('reports background windows as away', () => {
   assert.deepEqual(deriveActivity({ isFocused: false, roomName: 'Lobby' }), {
     details: 'Away from Hablix',
