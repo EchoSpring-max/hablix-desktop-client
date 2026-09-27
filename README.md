@@ -1,6 +1,6 @@
 # Hablix Desktop
 
-A small Windows desktop client for [Hablix](https://hablix.org/client) with automatic Discord Rich Presence.
+A desktop client for [Hablix](https://hablix.org/client) on Windows and macOS with automatic Discord Rich Presence.
 
 ## Features
 
@@ -39,6 +39,17 @@ npm run dist
 ```
 
 The installer and portable executable are written to `dist/`.
+
+## Build for macOS
+
+On macOS 11 or newer:
+
+```bash
+npm ci
+npm run dist:mac
+```
+
+This creates a universal DMG and ZIP for both Apple Silicon and Intel Macs in `dist/`. Public releases are currently unsigned and unnotarized, so on first launch use **Control-click → Open** and confirm macOS's prompt. A normal double-click works after the first approval.
 
 ## Project status
 

@@ -182,15 +182,35 @@ function createMainWindow() {
 }
 
 function buildMenu() {
-  const template = [
-    {
+  const template = [];
+
+  if (process.platform === 'darwin') {
+    template.push({
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    });
+  } else {
+    template.push({
       label: 'Hablix',
       submenu: [
         { label: 'Reload Hotel', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.reload() },
         { type: 'separator' },
         { role: 'quit' }
       ]
-    },
+    });
+  }
+
+  template.push(
     {
       label: 'User Commands',
       submenu: [
@@ -219,7 +239,7 @@ function buildMenu() {
         { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') }
       ]
     }
-  ];
+  );
 
   if (hasStaffAccess) {
     template.push({
@@ -250,6 +270,11 @@ function buildMenu() {
       ]
     }
   );
+
+  if (process.platform === 'darwin') {
+    template.splice(template.length - 1, 0, { role: 'editMenu' });
+    template.push({ role: 'windowMenu' });
+  }
 
   return Menu.buildFromTemplate(template);
 }
