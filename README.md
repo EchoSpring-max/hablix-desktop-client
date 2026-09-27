@@ -9,6 +9,7 @@ A small Windows desktop client for [Hablix](https://hablix.org/client) with auto
 - Connects automatically to the locally running Discord desktop app through the Hablix RPC application (`1553805351479017632`).
 - Displays the registered `hablix-large` artwork asset on every activity.
 - Updates the activity for signing in, loading, visiting rooms, browsing the navigator or catalog, checking inventory, chatting with friends, changing outfits, and being away.
+- Adds a **Staff** menu with shortcuts for Hablix's existing room, chatlog, selected-user, and report tools. The menu appears only when the server-authorized moderator toolbar control is present, and Hablix continues to enforce every action permission.
 - Restricts in-app navigation to `hablix.org`; external links open in the default browser.
 - Uses Electron isolation, sandboxing, and a deny-by-default permission policy.
 

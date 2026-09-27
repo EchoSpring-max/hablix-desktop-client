@@ -23,6 +23,7 @@ const DOM_PROBE = `(() => {
     readyState: document.readyState,
     isLogin: Boolean(document.querySelector('#login-form, #loginForm, input[name="username"]')),
     hasHotelClient: Boolean(document.querySelector('.nitro-room-tools-container, [class*="nitro-"], canvas')),
+    hasStaffAccess: Boolean(document.querySelector('.navigation-item.icon.icon-modtools')),
     roomName: window[roomKey] || '',
     panel: document.querySelector('.nitro-avatar-editor') ? 'avatar-editor' :
       document.querySelector('.nitro-catalog') ? 'catalog' :
@@ -79,9 +80,11 @@ function deriveActivity(snapshot = {}) {
 }
 
 class ActivityTracker {
-  constructor(window, presence) {
+  constructor(window, presence, onStaffAccessChange = () => {}) {
     this.window = window;
     this.presence = presence;
+    this.onStaffAccessChange = onStaffAccessChange;
+    this.hasStaffAccess = null;
     this.timer = null;
     this.isLoading = true;
   }
@@ -114,6 +117,12 @@ class ActivityTracker {
       } catch {
         pageState = {};
       }
+    }
+
+    const hasStaffAccess = pageState.hasStaffAccess === true;
+    if (hasStaffAccess !== this.hasStaffAccess) {
+      this.hasStaffAccess = hasStaffAccess;
+      this.onStaffAccessChange(hasStaffAccess);
     }
 
     await this.presence.setActivity(deriveActivity({

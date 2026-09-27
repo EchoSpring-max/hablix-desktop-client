@@ -1,8 +1,9 @@
 const path = require('node:path');
-const { app, BrowserWindow, Menu, session, shell } = require('electron');
+const { app, BrowserWindow, dialog, Menu, session, shell } = require('electron');
 const { ActivityTracker } = require('./activity');
 const { isAllowedHablixUrl, isSafeExternalUrl } = require('./navigation');
 const { PresenceManager } = require('./presence');
+const { createStaffActionScript } = require('./staff-actions');
 
 const HABLIX_URL = 'https://hablix.org/client';
 const MIN_SPLASH_TIME_MS = 1_600;
@@ -13,6 +14,7 @@ let splashStartedAt = 0;
 let splashFallbackTimer;
 let revealScheduled = false;
 let activityTracker;
+let hasStaffAccess = null;
 const presence = new PresenceManager();
 
 function secureWebPreferences(extra = {}) {
@@ -88,6 +90,37 @@ function revealMainWindow() {
   }, remaining);
 }
 
+async function runStaffAction(action) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  let result;
+  try {
+    result = await mainWindow.webContents.executeJavaScript(createStaffActionScript(action), true);
+  } catch {
+    result = { ok: false, reason: 'unavailable' };
+  }
+  if (result?.ok) return;
+
+  const details = {
+    'not-authorized': 'This menu is available only when Hablix grants moderator or administrator access.',
+    'enter-room': 'Enter a room before opening this staff tool.',
+    'select-user': 'Select a user in the room before opening the user tool.',
+    unavailable: 'Hablix did not expose this staff tool in the current view.'
+  };
+  void dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Staff tool unavailable',
+    message: 'Staff tool unavailable',
+    detail: details[result?.reason] || details.unavailable
+  });
+}
+
+function setStaffAccess(value) {
+  if (hasStaffAccess === value) return;
+  hasStaffAccess = value;
+  console.info(`Staff quick access ${value ? 'enabled' : 'disabled'}.`);
+  Menu.setApplicationMenu(buildMenu());
+}
+
 function createMainWindow() {
   createSplashWindow();
   mainWindow = new BrowserWindow({
@@ -103,7 +136,7 @@ function createMainWindow() {
   });
 
   applyNavigationPolicy(mainWindow);
-  activityTracker = new ActivityTracker(mainWindow, presence);
+  activityTracker = new ActivityTracker(mainWindow, presence, setStaffAccess);
   activityTracker.start();
   mainWindow.webContents.on('did-frame-finish-load', (_event, isMainFrame) => {
     if (isMainFrame) revealMainWindow();
@@ -126,7 +159,7 @@ function createMainWindow() {
 }
 
 function buildMenu() {
-  return Menu.buildFromTemplate([
+  const template = [
     {
       label: 'Hablix',
       submenu: [
@@ -134,7 +167,24 @@ function buildMenu() {
         { type: 'separator' },
         { role: 'quit' }
       ]
-    },
+    }
+  ];
+
+  if (hasStaffAccess) {
+    template.push({
+      label: 'Staff',
+      submenu: [
+        { label: 'Toggle Mod Tools', accelerator: 'CmdOrCtrl+Shift+M', click: () => void runStaffAction('toggle') },
+        { type: 'separator' },
+        { label: 'Current Room Tool', accelerator: 'CmdOrCtrl+Shift+I', click: () => void runStaffAction('room') },
+        { label: 'Current Room Chatlog', accelerator: 'CmdOrCtrl+Shift+L', click: () => void runStaffAction('chatlog') },
+        { label: 'Selected User Tool', accelerator: 'CmdOrCtrl+Shift+U', click: () => void runStaffAction('user') },
+        { label: 'Reports Queue', accelerator: 'CmdOrCtrl+Shift+T', click: () => void runStaffAction('reports') }
+      ]
+    });
+  }
+
+  template.push(
     {
       label: 'View',
       submenu: [
@@ -148,7 +198,9 @@ function buildMenu() {
         { role: 'togglefullscreen' }
       ]
     }
-  ]);
+  );
+
+  return Menu.buildFromTemplate(template);
 }
 
 app.whenReady().then(() => {
