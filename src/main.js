@@ -4,6 +4,7 @@ const { ActivityTracker } = require('./activity');
 const { isAllowedHablixUrl, isSafeExternalUrl } = require('./navigation');
 const { PresenceManager } = require('./presence');
 const { createStaffActionScript } = require('./staff-actions');
+const { createUserActionScript } = require('./user-actions');
 
 const HABLIX_URL = 'https://hablix.org/client';
 const MIN_SPLASH_TIME_MS = 1_600;
@@ -114,6 +115,28 @@ async function runStaffAction(action) {
   });
 }
 
+async function runUserAction(action) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  let result;
+  try {
+    result = await mainWindow.webContents.executeJavaScript(createUserActionScript(action), true);
+  } catch {
+    result = { ok: false, reason: 'unavailable' };
+  }
+  if (result?.ok) return;
+
+  const details = {
+    'enter-room': 'Enter a room before using this shortcut.',
+    unavailable: 'Hablix did not expose this control in the current view.'
+  };
+  void dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Quick action unavailable',
+    message: 'Quick action unavailable',
+    detail: details[result?.reason] || details.unavailable
+  });
+}
+
 function setStaffAccess(value) {
   if (hasStaffAccess === value) return;
   hasStaffAccess = value;
@@ -166,6 +189,34 @@ function buildMenu() {
         { label: 'Reload Hotel', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.reload() },
         { type: 'separator' },
         { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Quick Access',
+      submenu: [
+        { label: 'Navigator', accelerator: 'CmdOrCtrl+Shift+N', click: () => void runUserAction('navigator') },
+        { label: 'Catalog', accelerator: 'CmdOrCtrl+Shift+C', click: () => void runUserAction('catalog') },
+        { label: 'Inventory', accelerator: 'CmdOrCtrl+Shift+B', click: () => void runUserAction('inventory') },
+        { label: 'Friends', accelerator: 'CmdOrCtrl+Shift+F', click: () => void runUserAction('friends') },
+        { label: 'Messages', click: () => void runUserAction('messages') },
+        { label: 'Camera', click: () => void runUserAction('camera') },
+        { type: 'separator' },
+        {
+          label: 'Room Commands',
+          submenu: [
+            { label: 'Wave (o/)', click: () => void runUserAction('wave') },
+            { label: 'Go Idle (:idle)', click: () => void runUserAction('idle') },
+            { label: 'Respect User (_b)', click: () => void runUserAction('respect') },
+            { label: 'Flip Room (:flip)', click: () => void runUserAction('flip') },
+            { label: 'Set Zoom (:zoom)', click: () => void runUserAction('zoom') },
+            { label: 'Hold Sign (:sign)', click: () => void runUserAction('sign') },
+            { type: 'separator' },
+            { label: 'Furniture Chooser (:furni)', click: () => void runUserAction('furnitureChooser') },
+            { label: 'User Chooser (:chooser)', click: () => void runUserAction('userChooser') },
+            { label: 'Toggle FPS (:togglefps)', click: () => void runUserAction('toggleFps') },
+            { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') }
+          ]
+        }
       ]
     }
   ];
