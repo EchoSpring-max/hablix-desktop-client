@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self';">
+    <title>Discord Rich Presence</title>
+    <link rel="stylesheet" href="settings.css">
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">HABLIX DESKTOP</div>
+      <h1>Discord Rich Presence</h1>
+      <p class="intro">Show that you are playing Hablix. This connects only to the Discord desktop app running on this computer.</p>
+
+      <form id="settings-form">
+        <label for="client-id">Discord Application ID <span>required for RPC</span></label>
+        <input id="client-id" name="clientId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="123456789012345678">
+        <p class="hint">Create an application in Discord's Developer Portal, then paste its Application ID here.</p>
+
+        <div class="grid">
+          <div>
+            <label for="details">Activity title</label>
+            <input id="details" name="details" maxlength="128" placeholder="Exploring Hablix">
+          </div>
+          <div>
+            <label for="state">Activity status</label>
+            <input id="state" name="state" maxlength="128" placeholder="In the hotel">
+          </div>
+        </div>
+
+        <label for="large-image-key">Large image asset key <span>optional</span></label>
+        <input id="large-image-key" name="largeImageKey" maxlength="64" placeholder="hablix_logo">
+
+        <label for="large-image-text">Large image hover text</label>
+        <input id="large-image-text" name="largeImageText" maxlength="128" placeholder="Hablix">
+
+        <label class="check-row">
+          <input id="show-play-button" name="showPlayButton" type="checkbox">
+          <span>Show a “Play Hablix” button on the activity</span>
+        </label>
+
+        <div id="message" role="status" aria-live="polite"></div>
+        <div class="actions">
+          <button type="button" class="secondary" id="cancel">Cancel</button>
+          <button type="submit">Save &amp; connect</button>
+        </div>
+      </form>
+    </main>
+    <script src="settings.js"></script>
+  </body>
+</html>

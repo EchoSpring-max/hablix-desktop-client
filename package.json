@@ -1,0 +1,44 @@
+{
+  "name": "hablix-desktop",
+  "version": "1.0.0",
+  "description": "A focused desktop client for Hablix with configurable Discord Rich Presence.",
+  "main": "src/main.js",
+  "author": "Hablix Desktop contributors",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "dist": "electron-builder --win nsis portable"
+  },
+  "dependencies": {
+    "discord-rpc": "4.0.1"
+  },
+  "devDependencies": {
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "org.hablix.desktop",
+    "productName": "Hablix Desktop",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "src/assets/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
