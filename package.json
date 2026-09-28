@@ -1,6 +1,6 @@
 {
   "name": "hablix-desktop",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "A focused desktop client for Hablix with automatic Discord Rich Presence.",
   "main": "src/main.js",
   "author": "Hablix Desktop contributors",
@@ -12,7 +12,8 @@
     "dist": "npm run dist:win",
     "dist:win": "electron-builder --win nsis portable",
     "icon:mac": "bash scripts/create-mac-icon.sh",
-    "dist:mac": "npm run icon:mac && electron-builder --mac --publish never"
+    "dist:mac": "npm run icon:mac && electron-builder --mac --publish never",
+    "dist:linux": "electron-builder --linux AppImage deb --publish never"
   },
   "dependencies": {
     "discord-rpc": "4.0.1"
@@ -61,6 +62,20 @@
     },
     "dmg": {
       "title": "Hablix Desktop ${version}"
+    },
+    "linux": {
+      "icon": "src/assets/icon.png",
+      "category": "Game",
+      "executableName": "hablix-desktop",
+      "synopsis": "Hablix desktop client with Discord Rich Presence",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "deb": {
+      "priority": "optional"
     },
     "nsis": {
       "oneClick": false,
