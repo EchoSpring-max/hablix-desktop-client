@@ -1,9 +1,13 @@
 {
   "name": "hablix-desktop",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "A focused desktop client for Hablix with automatic Discord Rich Presence.",
   "main": "src/main.js",
-  "author": "Hablix Desktop contributors",
+  "author": {
+    "name": "Hablix Desktop contributors",
+    "email": "EchoSpring-max@users.noreply.github.com"
+  },
+  "desktopName": "hablix-desktop",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -67,6 +71,8 @@
       "icon": "src/assets/icon.png",
       "category": "Game",
       "executableName": "hablix-desktop",
+      "maintainer": "EchoSpring-max <EchoSpring-max@users.noreply.github.com>",
+      "syncDesktopName": true,
       "synopsis": "Hablix desktop client with Discord Rich Presence",
       "target": [
         "AppImage",

@@ -10,6 +10,9 @@ test('Linux build produces AppImage and Debian packages', () => {
   assert.match(packageJson.scripts['dist:linux'], /--publish never/);
   assert.equal(packageJson.build.linux.icon, 'src/assets/icon.png');
   assert.equal(packageJson.build.linux.category, 'Game');
+  assert.equal(packageJson.desktopName, 'hablix-desktop');
+  assert.equal(packageJson.build.linux.syncDesktopName, true);
+  assert.match(packageJson.build.linux.maintainer, /@users\.noreply\.github\.com/);
   assert.deepEqual(packageJson.build.linux.target, ['AppImage', 'deb']);
 });
 
