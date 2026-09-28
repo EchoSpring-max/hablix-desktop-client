@@ -1,10 +1,12 @@
 const path = require('node:path');
 const { app, BrowserWindow, dialog, Menu, session, shell } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const { ActivityTracker } = require('./activity');
 const { isAllowedHablixUrl, isSafeExternalUrl } = require('./navigation');
 const { PresenceManager } = require('./presence');
 const { createStaffActionScript } = require('./staff-actions');
 const { createUserActionScript } = require('./user-actions');
+const { UpdateManager } = require('./updater');
 
 const HABLIX_URL = 'https://hablix.org/client';
 const MIN_SPLASH_TIME_MS = 1_600;
@@ -15,6 +17,7 @@ let splashStartedAt = 0;
 let splashFallbackTimer;
 let revealScheduled = false;
 let activityTracker;
+let updateManager;
 let hasStaffAccess = null;
 const presence = new PresenceManager();
 
@@ -201,6 +204,7 @@ function buildMenu() {
       label: app.name,
       submenu: [
         { role: 'about' },
+        { label: 'Check for Updates…', click: () => void updateManager?.checkNow() },
         { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },
@@ -216,6 +220,7 @@ function buildMenu() {
       label: 'Hablix',
       submenu: [
         { label: 'Reload Hotel', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.reload() },
+        { label: 'Check for Updates…', click: () => void updateManager?.checkNow() },
         { type: 'separator' },
         { role: 'quit' }
       ]
@@ -331,6 +336,14 @@ app.whenReady().then(() => {
   Menu.setApplicationMenu(buildMenu());
   createMainWindow();
   void presence.start();
+  updateManager = new UpdateManager({
+    app,
+    autoUpdater,
+    dialog,
+    shell,
+    getWindow: () => mainWindow
+  });
+  updateManager.start();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
@@ -342,5 +355,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  updateManager?.stop();
   void presence.stop();
 });

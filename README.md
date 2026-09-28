@@ -13,6 +13,7 @@ A desktop client for [Hablix](https://hablix.org/client) on Windows, macOS, and 
 - Adds an **Admin Commands** dropdown with all top-level Hablix moderation tools plus permission-gated room-management commands. The dropdown appears only when the server-authorized moderator toolbar control is present, and Hablix continues to enforce every action permission and confirmation.
 - Restricts in-app navigation to `hablix.org`; external links open in the default browser.
 - Uses Electron isolation, sandboxing, and a deny-by-default permission policy.
+- Checks GitHub Releases automatically, downloads updates in the background, and offers to restart when an update is ready. The Windows portable edition links directly to the new download because a running portable executable cannot replace itself.
 
 ## Development
 
@@ -39,6 +40,8 @@ npm run dist
 ```
 
 The installer and portable executable are written to `dist/`.
+
+Install version 1.8.0 or newer once to enable automatic updates. Installed builds also include **Hablix → Check for Updates…** (or the app menu on macOS) for an immediate check.
 
 ## Build for macOS
 

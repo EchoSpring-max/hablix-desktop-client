@@ -5,6 +5,7 @@ const path = require('node:path');
 const packageJson = require('../package.json');
 
 const root = path.join(__dirname, '..');
+const workflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'linux-release.yml'), 'utf8');
 
 test('Linux build produces AppImage and Debian packages', () => {
   assert.match(packageJson.scripts['dist:linux'], /--publish never/);
@@ -17,11 +18,15 @@ test('Linux build produces AppImage and Debian packages', () => {
 });
 
 test('Linux workflow builds x64 and ARM64 release assets', () => {
-  const workflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'linux-release.yml'), 'utf8');
   assert.match(workflow, /architecture: x64/);
   assert.match(workflow, /architecture: arm64/);
   assert.match(workflow, /ubuntu-24\.04-arm/);
   assert.match(workflow, /npm run dist:linux/);
   assert.match(workflow, /dist\/\*\.AppImage/);
   assert.match(workflow, /dist\/\*\.deb/);
+});
+
+test('Linux release publishes architecture-specific updater metadata', () => {
+  assert.match(workflow, /dist\/\*\.yml/);
+  assert.match(workflow, /dist\/\*\.blockmap/);
 });

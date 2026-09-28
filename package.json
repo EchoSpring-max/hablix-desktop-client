@@ -1,6 +1,6 @@
 {
   "name": "hablix-desktop",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "A focused desktop client for Hablix with automatic Discord Rich Presence.",
   "main": "src/main.js",
   "author": {
@@ -20,7 +20,8 @@
     "dist:linux": "electron-builder --linux AppImage deb --publish never"
   },
   "dependencies": {
-    "discord-rpc": "4.0.1"
+    "discord-rpc": "4.0.1",
+    "electron-updater": "6.8.9"
   },
   "devDependencies": {
     "electron": "44.4.5",
@@ -36,6 +37,11 @@
     ],
     "directories": {
       "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "EchoSpring-max",
+      "repo": "hablix-desktop-client"
     },
     "win": {
       "icon": "src/assets/icon.ico",
@@ -62,7 +68,7 @@
           ]
         }
       ],
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "Hablix-Desktop-${version}-${arch}.${ext}"
     },
     "dmg": {
       "title": "Hablix Desktop ${version}"
@@ -78,17 +84,21 @@
         "AppImage",
         "deb"
       ],
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "Hablix-Desktop-${version}-${arch}.${ext}"
     },
     "deb": {
       "priority": "optional"
     },
     "nsis": {
+      "artifactName": "Hablix-Desktop-Setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "src/assets/icon.ico",
       "uninstallerIcon": "src/assets/icon.ico",
       "installerHeaderIcon": "src/assets/icon.ico"
+    },
+    "portable": {
+      "artifactName": "Hablix-Desktop-Portable-${version}.${ext}"
     }
   }
 }
