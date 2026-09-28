@@ -27,6 +27,6 @@ test('Linux workflow builds x64 and ARM64 release assets', () => {
 });
 
 test('Linux release publishes architecture-specific updater metadata', () => {
-  assert.match(workflow, /dist\/\*\.yml/);
+  assert.match(workflow, /dist\/latest\*\.yml/);
   assert.match(workflow, /dist\/\*\.blockmap/);
 });
