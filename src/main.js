@@ -93,12 +93,7 @@ function revealMainWindow() {
 
 async function runStaffAction(action) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  let result;
-  try {
-    result = await mainWindow.webContents.executeJavaScript(createStaffActionScript(action), true);
-  } catch {
-    result = { ok: false, reason: 'unavailable' };
-  }
+  const result = await executeInClientFrames(createStaffActionScript(action));
   if (result?.ok) return;
 
   const details = {
@@ -117,12 +112,7 @@ async function runStaffAction(action) {
 
 async function runUserAction(action) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  let result;
-  try {
-    result = await mainWindow.webContents.executeJavaScript(createUserActionScript(action), true);
-  } catch {
-    result = { ok: false, reason: 'unavailable' };
-  }
+  const result = await executeInClientFrames(createUserActionScript(action));
   if (result?.ok) return;
 
   const details = {
@@ -135,6 +125,28 @@ async function runUserAction(action) {
     message: 'Quick action unavailable',
     detail: details[result?.reason] || details.unavailable
   });
+}
+
+async function executeInClientFrames(script) {
+  const fallback = { ok: false, reason: 'unavailable' };
+  if (!mainWindow || mainWindow.isDestroyed()) return fallback;
+
+  const failures = [];
+  const frames = mainWindow.webContents.mainFrame.framesInSubtree
+    .filter(frame => !frame.detached);
+
+  for (const frame of frames) {
+    try {
+      const result = await frame.executeJavaScript(script, true);
+      if (result?.ok) return result;
+      if (result) failures.push(result);
+    } catch {}
+  }
+
+  const reasonPriority = ['select-user', 'enter-room', 'not-authorized', 'unavailable'];
+  return reasonPriority
+    .map(reason => failures.find(result => result.reason === reason))
+    .find(Boolean) || failures[0] || fallback;
 }
 
 function setStaffAccess(value) {
@@ -226,17 +238,38 @@ function buildMenu() {
           ]
         },
         { type: 'separator' },
-        { label: 'Wave (o/)', click: () => void runUserAction('wave') },
-        { label: 'Go Idle (:idle)', click: () => void runUserAction('idle') },
-        { label: 'Respect User (_b)', click: () => void runUserAction('respect') },
-        { label: 'Flip Room (:flip)', click: () => void runUserAction('flip') },
-        { label: 'Set Zoom (:zoom)', click: () => void runUserAction('zoom') },
-        { label: 'Hold Sign (:sign)', click: () => void runUserAction('sign') },
-        { type: 'separator' },
-        { label: 'Furniture Chooser (:furni)', click: () => void runUserAction('furnitureChooser') },
-        { label: 'User Chooser (:chooser)', click: () => void runUserAction('userChooser') },
-        { label: 'Toggle FPS (:togglefps)', click: () => void runUserAction('toggleFps') },
-        { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') }
+        {
+          label: 'Actions & Expressions',
+          submenu: [
+            { label: 'Wave (o/ or _o/)', click: () => void runUserAction('wave') },
+            { label: 'Go Idle (:idle)', click: () => void runUserAction('idle') },
+            { label: 'Respect User (_b)', click: () => void runUserAction('respect') },
+            { type: 'separator' },
+            { label: 'Laugh — VIP (:d or ;d)', click: () => void runUserAction('laugh') },
+            { label: 'Kiss — VIP (:kiss)', click: () => void runUserAction('kiss') },
+            { label: 'Jump — VIP (:jump)', click: () => void runUserAction('jump') }
+          ]
+        },
+        {
+          label: 'Room View',
+          submenu: [
+            { label: 'Shake Room (:shake)', click: () => void runUserAction('shake') },
+            { label: 'Rotate Room (:rotate)', click: () => void runUserAction('rotate') },
+            { label: 'Flip Room (:flip or :iddqd)', click: () => void runUserAction('flip') },
+            { label: 'Set Zoom (:zoom)', click: () => void runUserAction('zoom') }
+          ]
+        },
+        {
+          label: 'Tools',
+          submenu: [
+            { label: 'Hold Sign (:sign)', click: () => void runUserAction('sign') },
+            { label: 'Furniture Chooser (:furni)', click: () => void runUserAction('furnitureChooser') },
+            { label: 'User Chooser (:chooser)', click: () => void runUserAction('userChooser') },
+            { label: 'Toggle FPS (:togglefps)', click: () => void runUserAction('toggleFps') },
+            { label: 'Screenshot (:screenshot)', click: () => void runUserAction('screenshot') },
+            { label: 'Client Info (:client, :nitro or :billsonnn)', click: () => void runUserAction('clientInfo') }
+          ]
+        }
       ]
     }
   );
@@ -250,7 +283,18 @@ function buildMenu() {
         { label: 'Current Room Tool', accelerator: 'CmdOrCtrl+Shift+I', click: () => void runStaffAction('room') },
         { label: 'Current Room Chatlog', accelerator: 'CmdOrCtrl+Shift+L', click: () => void runStaffAction('chatlog') },
         { label: 'Selected User Tool', accelerator: 'CmdOrCtrl+Shift+U', click: () => void runStaffAction('user') },
-        { label: 'Reports Queue', accelerator: 'CmdOrCtrl+Shift+T', click: () => void runStaffAction('reports') }
+        { label: 'Reports Queue', accelerator: 'CmdOrCtrl+Shift+T', click: () => void runStaffAction('reports') },
+        { type: 'separator' },
+        {
+          label: 'Room Management Commands',
+          submenu: [
+            { label: 'Pick Up All Furniture (:pickall)', click: () => void runUserAction('pickAll') },
+            { label: 'Eject Everyone (:ejectall)', click: () => void runUserAction('ejectAll') },
+            { label: 'Floor Editor (:floor)', click: () => void runUserAction('floorEditor') },
+            { label: 'Broadcast Floor Editor (:bcfloor)', click: () => void runUserAction('broadcastFloorEditor') },
+            { label: 'Room Settings (:settings)', click: () => void runUserAction('roomSettings') }
+          ]
+        }
       ]
     });
   }

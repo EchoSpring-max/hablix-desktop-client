@@ -5,7 +5,12 @@ const USER_ACTIONS = Object.freeze({
   friends: { type: 'control', selector: '.navigation-item.icon.icon-friendall' },
   messages: { type: 'control', selector: '.navigation-item.icon.icon-message' },
   camera: { type: 'control', selector: '.navigation-item.icon.icon-camera', reason: 'enter-room' },
+  shake: { type: 'command', command: ':shake' },
+  rotate: { type: 'command', command: ':rotate' },
+  laugh: { type: 'command', command: ':d' },
   wave: { type: 'command', command: 'o/' },
+  kiss: { type: 'command', command: ':kiss' },
+  jump: { type: 'command', command: ':jump' },
   idle: { type: 'command', command: ':idle' },
   respect: { type: 'command', command: '_b' },
   flip: { type: 'command', command: ':flip' },
@@ -14,7 +19,16 @@ const USER_ACTIONS = Object.freeze({
   furnitureChooser: { type: 'command', command: ':furni' },
   userChooser: { type: 'command', command: ':chooser' },
   toggleFps: { type: 'command', command: ':togglefps' },
-  screenshot: { type: 'command', command: ':screenshot' }
+  screenshot: { type: 'command', command: ':screenshot' },
+  clientInfo: { type: 'command', command: ':client' }
+});
+
+const ADMIN_ACTIONS = Object.freeze({
+  pickAll: { type: 'command', command: ':pickall' },
+  ejectAll: { type: 'command', command: ':ejectall' },
+  floorEditor: { type: 'command', command: ':floor' },
+  broadcastFloorEditor: { type: 'command', command: ':bcfloor' },
+  roomSettings: { type: 'command', command: ':settings' }
 });
 
 function runUserActionInPage(action) {
@@ -25,7 +39,12 @@ function runUserActionInPage(action) {
     friends: { type: 'control', selector: '.navigation-item.icon.icon-friendall' },
     messages: { type: 'control', selector: '.navigation-item.icon.icon-message' },
     camera: { type: 'control', selector: '.navigation-item.icon.icon-camera', reason: 'enter-room' },
+    shake: { type: 'command', command: ':shake' },
+    rotate: { type: 'command', command: ':rotate' },
+    laugh: { type: 'command', command: ':d' },
     wave: { type: 'command', command: 'o/' },
+    kiss: { type: 'command', command: ':kiss' },
+    jump: { type: 'command', command: ':jump' },
     idle: { type: 'command', command: ':idle' },
     respect: { type: 'command', command: '_b' },
     flip: { type: 'command', command: ':flip' },
@@ -34,9 +53,17 @@ function runUserActionInPage(action) {
     furnitureChooser: { type: 'command', command: ':furni' },
     userChooser: { type: 'command', command: ':chooser' },
     toggleFps: { type: 'command', command: ':togglefps' },
-    screenshot: { type: 'command', command: ':screenshot' }
+    screenshot: { type: 'command', command: ':screenshot' },
+    clientInfo: { type: 'command', command: ':client' }
   };
-  const selected = actions[action];
+  const adminActions = {
+    pickAll: { type: 'command', command: ':pickall' },
+    ejectAll: { type: 'command', command: ':ejectall' },
+    floorEditor: { type: 'command', command: ':floor' },
+    broadcastFloorEditor: { type: 'command', command: ':bcfloor' },
+    roomSettings: { type: 'command', command: ':settings' }
+  };
+  const selected = actions[action] || adminActions[action];
 
   if (!selected) return { ok: false, reason: 'unknown-action' };
   if (selected.type === 'control') {
@@ -59,10 +86,11 @@ function runUserActionInPage(action) {
 }
 
 function createUserActionScript(action) {
-  if (!Object.prototype.hasOwnProperty.call(USER_ACTIONS, action)) {
+  if (!Object.prototype.hasOwnProperty.call(USER_ACTIONS, action) &&
+      !Object.prototype.hasOwnProperty.call(ADMIN_ACTIONS, action)) {
     throw new Error(`Unknown user action: ${action}`);
   }
   return `(${runUserActionInPage.toString()})(${JSON.stringify(action)})`;
 }
 
-module.exports = { USER_ACTIONS, createUserActionScript, runUserActionInPage };
+module.exports = { ADMIN_ACTIONS, USER_ACTIONS, createUserActionScript, runUserActionInPage };

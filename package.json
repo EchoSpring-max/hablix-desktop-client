@@ -1,6 +1,6 @@
 {
   "name": "hablix-desktop",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "A focused desktop client for Hablix with automatic Discord Rich Presence.",
   "main": "src/main.js",
   "author": {

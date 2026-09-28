@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { USER_ACTIONS, createUserActionScript, runUserActionInPage } = require('../src/user-actions');
+const { ADMIN_ACTIONS, USER_ACTIONS, createUserActionScript, runUserActionInPage } = require('../src/user-actions');
 
 test('standard controls invoke Hablix existing UI', () => {
   const originalDocument = global.document;
@@ -39,7 +39,7 @@ test('room commands are prefilled and never submitted automatically', () => {
   }
 });
 
-test('commands fail closed outside rooms and exclude privileged bulk actions', () => {
+test('commands fail closed outside rooms', () => {
   const originalDocument = global.document;
   global.document = { querySelector: () => null };
   try {
@@ -47,7 +47,19 @@ test('commands fail closed outside rooms and exclude privileged bulk actions', (
   } finally {
     global.document = originalDocument;
   }
-  assert.equal(Object.prototype.hasOwnProperty.call(USER_ACTIONS, 'pickall'), false);
-  assert.equal(Object.prototype.hasOwnProperty.call(USER_ACTIONS, 'ejectall'), false);
-  assert.throws(() => createUserActionScript('ejectall'), /Unknown user action/);
+  assert.throws(() => createUserActionScript('unknown-command'), /Unknown user action/);
+});
+
+test('menus cover every Nitro user and permission-gated room command', () => {
+  const userCommands = Object.values(USER_ACTIONS)
+    .filter(action => action.type === 'command')
+    .map(action => action.command);
+  assert.deepEqual(userCommands, [
+    ':shake', ':rotate', ':d', 'o/', ':kiss', ':jump', ':idle', '_b', ':flip', ':zoom ', ':sign ',
+    ':furni', ':chooser', ':togglefps', ':screenshot', ':client'
+  ]);
+  assert.deepEqual(Object.values(ADMIN_ACTIONS).map(action => action.command), [
+    ':pickall', ':ejectall', ':floor', ':bcfloor', ':settings'
+  ]);
+  assert.match(createUserActionScript('ejectAll'), /:ejectall/);
 });
