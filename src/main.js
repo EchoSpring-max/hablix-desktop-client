@@ -11,6 +11,9 @@ const { UpdateManager } = require('./updater');
 const HABLIX_URL = 'https://hablix.org/client';
 const MIN_SPLASH_TIME_MS = 1_600;
 const MAX_SPLASH_TIME_MS = 15_000;
+
+if (process.platform === 'darwin') app.setName('Hablix');
+
 let mainWindow;
 let splashWindow;
 let splashStartedAt = 0;

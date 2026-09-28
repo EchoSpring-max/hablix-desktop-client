@@ -5,6 +5,7 @@ const path = require('node:path');
 const packageJson = require('../package.json');
 
 const root = path.join(__dirname, '..');
+const mainSource = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8');
 
 test('macOS build produces universal DMG and ZIP packages', () => {
   assert.match(packageJson.scripts['dist:mac'], /--publish never/);
@@ -21,4 +22,9 @@ test('macOS icon generation and release workflow are included', () => {
   assert.match(workflow, /runs-on: macos-14/);
   assert.match(workflow, /npm run dist:mac/);
   assert.match(workflow, /gh release upload/);
+});
+
+test('macOS application menu uses the short Hablix name', () => {
+  assert.match(mainSource, /if \(process\.platform === 'darwin'\) app\.setName\('Hablix'\)/);
+  assert.doesNotMatch(mainSource, /app\.setName\('hablix-desktop'\)/i);
 });
