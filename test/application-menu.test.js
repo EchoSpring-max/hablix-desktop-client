@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const mainSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+const roomEditorSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'room-editor.html'), 'utf8');
 
 test('Windows application menu exposes user and admin command dropdowns', () => {
   assert.match(mainSource, /label: 'User Commands'/);
@@ -16,4 +17,11 @@ test('application menu opens the bundled room editor', () => {
   assert.match(mainSource, /label: 'Room Editor…'/);
   assert.match(mainSource, /loadFile\(path\.join\(__dirname, 'room-editor\.html'\)\)/);
   assert.match(mainSource, /accelerator: 'CmdOrCtrl\+Shift\+E'/);
+});
+
+test('room editor includes floor finishes and PlusEMU furniture export', () => {
+  assert.match(roomEditorSource, /Floor finish/);
+  assert.match(roomEditorSource, /Furniture catalog/);
+  assert.match(roomEditorSource, /INSERT INTO items \(base_item, user_id, room_id/);
+  assert.match(roomEditorSource, /name:'place_furniture'/);
 });
