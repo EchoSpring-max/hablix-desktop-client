@@ -10,3 +10,10 @@ test('Windows application menu exposes user and admin command dropdowns', () => 
   assert.match(mainSource, /label: 'Admin Commands'/);
   assert.match(mainSource, /if \(hasStaffAccess\)/);
 });
+
+test('application menu opens the bundled room editor', () => {
+  assert.match(mainSource, /function openRoomEditor\(\)/);
+  assert.match(mainSource, /label: 'Room Editor…'/);
+  assert.match(mainSource, /loadFile\(path\.join\(__dirname, 'room-editor\.html'\)\)/);
+  assert.match(mainSource, /accelerator: 'CmdOrCtrl\+Shift\+E'/);
+});

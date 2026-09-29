@@ -16,6 +16,7 @@ if (process.platform === 'darwin') app.setName('Hablix');
 
 let mainWindow;
 let splashWindow;
+let roomEditorWindow;
 let splashStartedAt = 0;
 let splashFallbackTimer;
 let revealScheduled = false;
@@ -199,6 +200,29 @@ function createMainWindow() {
   void mainWindow.loadURL(HABLIX_URL);
 }
 
+function openRoomEditor() {
+  if (roomEditorWindow && !roomEditorWindow.isDestroyed()) {
+    roomEditorWindow.show();
+    roomEditorWindow.focus();
+    return;
+  }
+
+  roomEditorWindow = new BrowserWindow({
+    title: 'Hablix Room Studio',
+    width: 1440,
+    height: 900,
+    minWidth: 760,
+    minHeight: 560,
+    backgroundColor: '#0b0f16',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    webPreferences: secureWebPreferences()
+  });
+
+  roomEditorWindow.setMenuBarVisibility(false);
+  roomEditorWindow.on('closed', () => { roomEditorWindow = null; });
+  void roomEditorWindow.loadFile(path.join(__dirname, 'room-editor.html'));
+}
+
 function buildMenu() {
   const template = [];
 
@@ -222,6 +246,8 @@ function buildMenu() {
     template.push({
       label: 'Hablix',
       submenu: [
+        { label: 'Room Editor…', accelerator: 'CmdOrCtrl+Shift+E', click: openRoomEditor },
+        { type: 'separator' },
         { label: 'Reload Hotel', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.reload() },
         { label: 'Check for Updates…', click: () => void updateManager?.checkNow() },
         { type: 'separator' },
@@ -281,6 +307,13 @@ function buildMenu() {
       ]
     }
   );
+
+  if (process.platform === 'darwin') {
+    template[0].submenu.splice(2, 0,
+      { label: 'Room Editor…', accelerator: 'CmdOrCtrl+Shift+E', click: openRoomEditor },
+      { type: 'separator' }
+    );
+  }
 
   if (hasStaffAccess) {
     template.push({

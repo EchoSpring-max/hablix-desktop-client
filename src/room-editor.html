@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10151f">
+  <meta name="description" content="Build Habbo-compatible room floor plans and export them for PlusEMU.">
+  <title>Hablix Room Studio</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2310151f' d='M0 0h64v64H0z'/%3E%3Cpath fill='%2358d6c7' d='m32 8 23 12-23 12L9 20z'/%3E%3Cpath fill='%232d8f88' d='m9 20 23 12v24L9 44z'/%3E%3Cpath fill='%2344b7ae' d='m55 20-23 12v24l23-12z'/%3E%3Cpath fill='%23f7c85b' d='m32 17 7 4-7 4-7-4z'/%3E%3C/svg%3E">
+  <style>
+    :root{--bg:#0b0f16;--panel:#111823;--panel2:#17212e;--line:#273445;--text:#eef5f6;--muted:#8ea0ad;--mint:#58d6c7;--mint2:#2d8f88;--gold:#f7c85b;--danger:#ff6f7d;--shadow:0 18px 50px #0007;--radius:14px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark}
+    *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);overflow:hidden}button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .app{height:100%;display:grid;grid-template-rows:64px minmax(0,1fr);background:radial-gradient(circle at 45% 35%,#152131 0,#0b0f16 48%)}
+    header{display:flex;align-items:center;gap:16px;padding:0 18px;border-bottom:1px solid var(--line);background:#0d131cdd;backdrop-filter:blur(16px);z-index:10}
+    .brand{display:flex;align-items:center;gap:11px;min-width:232px}.mark{width:34px;height:34px;display:grid;place-items:center;background:linear-gradient(145deg,var(--mint),var(--mint2));clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);color:#07110f;font-weight:900}.brand strong{font-size:15px;letter-spacing:.02em}.brand span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .top-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.status{color:var(--muted);font-size:12px;margin-right:8px}.status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mint);margin-right:7px;box-shadow:0 0 0 4px #58d6c71a}
+    .btn{height:38px;border:1px solid var(--line);background:#151e2a;border-radius:9px;padding:0 13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer;transition:.18s ease}.btn:hover{background:#1d2938;border-color:#3a4b60}.btn:disabled{opacity:.35;cursor:not-allowed}.btn.primary{background:var(--mint);border-color:var(--mint);color:#071311}.btn.primary:hover{background:#74e1d5}.icon-btn{width:38px;padding:0}.shortcut{font-size:10px;color:var(--muted);font-weight:600}
+    main{min-height:0;display:grid;grid-template-columns:76px 250px minmax(360px,1fr) 330px}.rail,.sidebar,.inspector{background:#101721;border-right:1px solid var(--line);min-height:0;overflow:auto}.rail{padding:12px 9px;display:flex;flex-direction:column;gap:8px;align-items:center}.sidebar{padding:18px}.inspector{border-right:0;border-left:1px solid var(--line);padding:18px}
+    .tool{width:56px;min-height:54px;border:1px solid transparent;background:transparent;border-radius:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:11px}.tool .ico{font-size:20px;line-height:1}.tool:hover{background:#182230;color:var(--text)}.tool.active{background:#183731;border-color:#327c72;color:var(--mint)}.rail-spacer{flex:1}
+    .section{margin-bottom:22px}.section-title{display:flex;align-items:center;justify-content:space-between;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-size:11px;font-weight:800;margin-bottom:10px}.field{margin-bottom:12px}.field label{display:block;color:#b8c6ce;font-size:12px;font-weight:700;margin-bottom:7px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.control{width:100%;height:38px;border:1px solid var(--line);background:#0c121a;border-radius:8px;color:var(--text);padding:0 10px}.range-line{display:grid;grid-template-columns:1fr 42px;gap:9px;align-items:center}.range-line input[type=range]{accent-color:var(--mint);width:100%}.height-chip{height:34px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:#0c121a;font-weight:800;color:var(--gold)}
+    .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.template{height:56px;border:1px solid var(--line);background:#131c27;border-radius:9px;text-align:left;padding:8px 10px;cursor:pointer}.template:hover{border-color:#466076;background:#182431}.template b{display:block;font-size:12px}.template span{font-size:10px;color:var(--muted)}
+    .workspace{position:relative;min-width:0;min-height:0;overflow:hidden}.workspace-head{position:absolute;z-index:3;top:16px;left:18px;right:18px;display:flex;align-items:center;pointer-events:none}.workspace-head>*{pointer-events:auto}.room-name{background:#101721e8;border:1px solid var(--line);border-radius:10px;padding:9px 12px;box-shadow:var(--shadow)}.room-name strong{font-size:13px}.room-name span{font-size:11px;color:var(--muted);margin-left:8px}.zoom{margin-left:auto;display:flex;background:#101721e8;border:1px solid var(--line);border-radius:10px;padding:4px;box-shadow:var(--shadow)}.zoom button{width:31px;height:30px;border:0;background:transparent;border-radius:7px;cursor:pointer}.zoom button:hover{background:#253345}.zoom output{width:45px;display:grid;place-items:center;font-size:11px;color:var(--muted)}
+    #editor{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}.canvas-hint{position:absolute;left:18px;bottom:16px;background:#101721d9;border:1px solid var(--line);border-radius:9px;padding:8px 11px;color:var(--muted);font-size:11px;pointer-events:none}.canvas-hint b{color:var(--text)}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;background:#0b1119;border:1px solid var(--line);padding:3px;border-radius:9px;margin-bottom:16px}.tabs button{height:32px;border:0;background:transparent;border-radius:7px;color:var(--muted);font-weight:700;font-size:12px;cursor:pointer}.tabs button.active{background:#213042;color:var(--text)}.tab-panel{display:none}.tab-panel.active{display:block}
+    .preview-wrap{height:230px;background:linear-gradient(180deg,#0b1119,#111b27);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative;margin-bottom:14px}.preview-wrap::after{content:"LIVE PREVIEW";position:absolute;top:10px;left:10px;color:#8ea0ad;font-size:9px;letter-spacing:.14em;font-weight:900}.preview-wrap canvas{width:100%;height:100%}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}.stat{background:#0c121a;border:1px solid var(--line);border-radius:9px;padding:10px}.stat strong{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted)}
+    .notice{border:1px solid #5d4b25;background:#201c12;border-radius:10px;padding:11px;color:#d8c694;font-size:11px;line-height:1.5;margin:12px 0}.notice b{color:var(--gold)}
+    .stack{display:grid;gap:8px}.stack .btn{width:100%}.divider{height:1px;background:var(--line);margin:18px 0}.mapbox{width:100%;height:220px;resize:none;background:#090e14;border:1px solid var(--line);border-radius:9px;padding:10px;color:#b7d8d3;font:12px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:auto}.validate{font-size:11px;color:var(--muted);margin:8px 1px 12px;min-height:16px}.validate.ok{color:var(--mint)}.validate.bad{color:var(--danger)}
+    dialog{border:1px solid var(--line);border-radius:14px;background:#121a25;color:var(--text);box-shadow:var(--shadow);width:min(520px,calc(100% - 32px));padding:0}dialog::backdrop{background:#020508aa;backdrop-filter:blur(3px)}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-head h2{font-size:16px;margin:0}.modal-body{padding:18px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line)}.close{background:transparent;border:0;color:var(--muted);font-size:20px;cursor:pointer}
+    .toast{position:fixed;z-index:50;left:50%;bottom:24px;transform:translate(-50%,24px);opacity:0;background:#eef5f6;color:#101721;border-radius:10px;padding:11px 15px;font-size:12px;font-weight:800;box-shadow:var(--shadow);transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:1080px){main{grid-template-columns:68px 220px minmax(330px,1fr)}.inspector{position:fixed;right:0;top:64px;bottom:0;width:330px;z-index:9;transform:translateX(100%);transition:.22s;box-shadow:var(--shadow)}.inspector.open{transform:none}.mobile-inspector{display:inline-flex!important}}
+    @media(min-width:1081px){.mobile-inspector{display:none!important}}
+    @media(max-width:720px){.app{grid-template-rows:58px minmax(0,1fr)}header{padding:0 10px;gap:8px}.brand{min-width:0}.brand span,.status,.top-actions .text{display:none}main{grid-template-columns:58px minmax(0,1fr)}.sidebar{position:fixed;left:58px;top:58px;bottom:0;width:250px;z-index:8;transform:translateX(calc(-100% - 58px));transition:.22s;box-shadow:var(--shadow)}.sidebar.open{transform:none}.rail{padding:8px 4px}.tool{width:49px}.mobile-library{display:inline-flex!important}.inspector{top:58px}.canvas-hint{display:none}}
+    @media(min-width:721px){.mobile-library{display:none!important}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="mark">H</div><div><strong>Hablix Room Studio</strong><span>PlusEMU floor-plan builder</span></div></div>
+    <button class="btn icon-btn mobile-library" id="libraryToggle" aria-label="Toggle room settings">☰</button>
+    <div class="status" id="saveStatus">Saved locally</div>
+    <div class="top-actions">
+      <button class="btn icon-btn" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+      <button class="btn icon-btn" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button>
+      <button class="btn mobile-inspector" id="inspectorToggle">Export</button>
+      <button class="btn" id="importBtn"><span class="text">Import map</span><span>↥</span></button>
+      <button class="btn primary" id="downloadProject"><span class="text">Save project</span><span>↓</span></button>
+    </div>
+  </header>
+  <main>
+    <nav class="rail" aria-label="Editing tools">
+      <button class="tool active" data-tool="draw" title="Draw (D)"><span class="ico">◆</span><span>Draw</span></button>
+      <button class="tool" data-tool="erase" title="Erase (E)"><span class="ico">◇</span><span>Erase</span></button>
+      <button class="tool" data-tool="raise" title="Raise (R)"><span class="ico">＋</span><span>Raise</span></button>
+      <button class="tool" data-tool="lower" title="Lower (L)"><span class="ico">−</span><span>Lower</span></button>
+      <button class="tool" data-tool="door" title="Entrance (G)"><span class="ico">⇥</span><span>Entry</span></button>
+      <div class="rail-spacer"></div>
+      <button class="tool" id="clearBtn" title="Clear room"><span class="ico">⌫</span><span>Clear</span></button>
+    </nav>
+    <aside class="sidebar" id="sidebar">
+      <section class="section">
+        <div class="section-title">Room</div>
+        <div class="field"><label for="roomName">Project name</label><input class="control" id="roomName" value="New Hablix Room" maxlength="60"></div>
+        <div class="field-row">
+          <div class="field"><label for="width">Width</label><input class="control" id="width" type="number" min="4" max="64" value="14"></div>
+          <div class="field"><label for="height">Depth</label><input class="control" id="height" type="number" min="4" max="64" value="12"></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-title">Templates</div>
+        <div class="template-grid">
+          <button class="template" data-template="square"><b>Open hall</b><span>Simple rectangle</span></button>
+          <button class="template" data-template="lounge"><b>Lounge</b><span>Raised platform</span></button>
+          <button class="template" data-template="club"><b>Club</b><span>Split-level room</span></button>
+          <button class="template" data-template="maze"><b>Maze</b><span>Narrow pathways</span></button>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-title">Brush</div>
+        <div class="field"><label for="brushHeight">Tile height</label><div class="range-line"><input id="brushHeight" type="range" min="0" max="32" value="0"><output class="height-chip" id="heightValue">0</output></div></div>
+        <div class="field"><label for="brushSize">Brush size</label><select class="control" id="brushSize"><option value="1">1 × 1</option><option value="2">2 × 2</option><option value="3">3 × 3</option></select></div>
+      </section>
+      <section class="section">
+        <div class="section-title">Room settings</div>
+        <div class="field"><label for="doorDir">Entrance direction</label><select class="control" id="doorDir"><option value="0">North (0)</option><option value="2" selected>East (2)</option><option value="4">South (4)</option><option value="6">West (6)</option></select></div>
+        <div class="field"><label for="wallHeight">Wall height</label><div class="range-line"><input id="wallHeight" type="range" min="0" max="15" value="8"><output class="height-chip" id="wallValue">8</output></div></div>
+        <div class="field-row">
+          <div class="field"><label for="wallThick">Walls</label><select class="control" id="wallThick"><option value="-2">Thinnest</option><option value="-1">Thin</option><option value="0" selected>Normal</option><option value="1">Thick</option></select></div>
+          <div class="field"><label for="floorThick">Floor</label><select class="control" id="floorThick"><option value="-2">Thinnest</option><option value="-1">Thin</option><option value="0" selected>Normal</option><option value="1">Thick</option></select></div>
+        </div>
+      </section>
+    </aside>
+    <section class="workspace">
+      <div class="workspace-head"><div class="room-name"><strong id="roomLabel">New Hablix Room</strong><span id="dimensionsLabel">14 × 12</span></div><div class="zoom"><button id="zoomOut" aria-label="Zoom out">−</button><output id="zoomValue">100%</output><button id="zoomIn" aria-label="Zoom in">+</button><button id="fitView" aria-label="Fit view">⌗</button></div></div>
+      <canvas id="editor" aria-label="Room floor-plan grid"></canvas>
+      <div class="canvas-hint"><b>Drag</b> to paint · <b>Right-drag</b> to pan · <b>Wheel</b> to zoom</div>
+    </section>
+    <aside class="inspector" id="inspector">
+      <div class="tabs"><button class="active" data-tab="preview">Preview</button><button data-tab="map">Floor map</button></div>
+      <div class="tab-panel active" id="previewPanel">
+        <div class="preview-wrap"><canvas id="preview" aria-label="Isometric room preview"></canvas></div>
+        <div class="stat-grid"><div class="stat"><strong id="tileCount">0</strong><span>walkable tiles</span></div><div class="stat"><strong id="levelCount">1</strong><span>height levels</span></div><div class="stat"><strong id="mapSize">0 B</strong><span>map size</span></div></div>
+        <div class="section-title">Export for game</div>
+        <div class="field"><label for="roomId">Hablix room ID</label><input class="control" id="roomId" type="number" min="1" placeholder="e.g. 1042"></div>
+        <div class="notice"><b>Before importing:</b> back up your database and empty or pick up furniture on tiles you plan to remove.</div>
+        <div class="stack"><button class="btn primary" id="copyMap">Copy floor map</button><button class="btn" id="downloadMap">Download .txt map</button><button class="btn" id="downloadSql">Download PlusEMU SQL</button></div>
+      </div>
+      <div class="tab-panel" id="mapPanel">
+        <textarea class="mapbox" id="mapText" spellcheck="false" aria-label="Floor map text"></textarea>
+        <div class="validate ok" id="validation">Valid PlusEMU floor map</div>
+        <div class="stack"><button class="btn primary" id="applyMap">Apply map to canvas</button><button class="btn" id="copyMap2">Copy to clipboard</button></div>
+        <div class="divider"></div>
+        <div class="section-title">Format guide</div>
+        <div class="notice"><b>x</b> removes a tile. <b>0–9</b> and <b>a–w</b> set heights 0–32. Every row must have the same width.</div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<dialog id="importDialog">
+  <form method="dialog">
+    <div class="modal-head"><h2>Import a room</h2><button class="close" value="cancel" aria-label="Close">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label for="importType">Import type</label><select class="control" id="importType"><option value="map">PlusEMU floor map (.txt)</option><option value="project">Hablix Room Studio project (.json)</option></select></div>
+      <div class="field"><label for="fileInput">Choose file</label><input class="control" id="fileInput" type="file" accept=".txt,.json,text/plain,application/json"></div>
+      <div class="field"><label for="pasteImport">Or paste a floor map</label><textarea class="mapbox" id="pasteImport" placeholder="xxxxxxxx&#10;x000000x&#10;x000000x&#10;xxxxxxxx"></textarea></div>
+      <div class="validate" id="importValidation"></div>
+    </div>
+    <div class="modal-actions"><button class="btn" value="cancel">Cancel</button><button class="btn primary" value="default" id="confirmImport">Import room</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+  'use strict';
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+  const CHARS='0123456789abcdefghijklmnopqrstuvw';
+  const els={editor:$('#editor'),preview:$('#preview'),roomName:$('#roomName'),width:$('#width'),height:$('#height'),brushHeight:$('#brushHeight'),heightValue:$('#heightValue'),brushSize:$('#brushSize'),doorDir:$('#doorDir'),wallHeight:$('#wallHeight'),wallValue:$('#wallValue'),wallThick:$('#wallThick'),floorThick:$('#floorThick'),roomId:$('#roomId'),mapText:$('#mapText'),validation:$('#validation'),tileCount:$('#tileCount'),levelCount:$('#levelCount'),mapSize:$('#mapSize'),roomLabel:$('#roomLabel'),dimensionsLabel:$('#dimensionsLabel'),saveStatus:$('#saveStatus'),zoomValue:$('#zoomValue'),toast:$('#toast')};
+  const ctx=els.editor.getContext('2d'), pctx=els.preview.getContext('2d');
+  let state={name:'New Hablix Room',w:14,h:12,tiles:[],door:{x:1,y:11,dir:2},wallHeight:8,wallThick:0,floorThick:0};
+  let tool='draw',brush=0,brushSize=1,zoom=1,pan={x:0,y:0},pointer={down:false,panning:false,lastX:0,lastY:0},history=[],future=[],saveTimer;
+  function blank(w,h,value=null){return Array.from({length:h},()=>Array(w).fill(value));}
+  function makeInitial(){state.tiles=blank(state.w,state.h,null);for(let y=1;y<state.h-1;y++)for(let x=1;x<state.w-1;x++)state.tiles[y][x]=0;state.door={x:1,y:state.h-2,dir:2};}
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  function snapshot(){history.push(clone(state));if(history.length>80)history.shift();future=[];syncUndo();}
+  function syncUndo(){$('#undo').disabled=!history.length;$('#redo').disabled=!future.length}
+  function restore(s){state=clone(s);syncControls();renderAll();queueSave()}
+  function undo(){if(!history.length)return;future.push(clone(state));restore(history.pop())}
+  function redo(){if(!future.length)return;history.push(clone(state));restore(future.pop())}
+  function heightChar(v){return v===null?'x':CHARS[Math.max(0,Math.min(32,v))]}
+  function charHeight(c){c=c.toLowerCase();return c==='x'?null:CHARS.indexOf(c)}
+  function mapString(){return state.tiles.map(r=>r.map(heightChar).join('')).join('\r')}
+  function displayMap(){return state.tiles.map(r=>r.map(heightChar).join('')).join('\n')}
+  function validateMap(text){const lines=text.trim().toLowerCase().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');if(!text.trim())return{ok:false,msg:'Paste a floor map first.'};if(lines.length>64)return{ok:false,msg:'Map is taller than 64 tiles.'};if(lines[0].length<1||lines[0].length>64)return{ok:false,msg:'Map width must be 1–64 tiles.'};if(lines.some(l=>l.length!==lines[0].length))return{ok:false,msg:'Every row must have the same width.'};if(lines.some(l=>/[^x0-9a-w]/.test(l)))return{ok:false,msg:'Only x, 0–9, and a–w are allowed.'};const count=lines.join('').split('').filter(c=>c!=='x').length;if(count>2048)return{ok:false,msg:'PlusEMU accepts at most 2,048 walkable tiles.'};return{ok:true,msg:`Valid ${lines[0].length} × ${lines.length} map · ${count} tiles`,lines}}
+  function loadMap(text,remember=true){const v=validateMap(text);if(!v.ok)throw new Error(v.msg);if(remember)snapshot();state.w=v.lines[0].length;state.h=v.lines.length;state.tiles=v.lines.map(l=>[...l].map(charHeight));if(state.door.x>=state.w||state.door.y>=state.h||state.tiles[state.door.y]?.[state.door.x]===null){let found=false;for(let y=state.h-1;y>=0&&!found;y--)for(let x=0;x<state.w;x++)if(state.tiles[y][x]!==null){state.door={x,y,dir:2};found=true;break}}syncControls();fit();renderAll();queueSave()}
+  function syncControls(){els.roomName.value=state.name;els.width.value=state.w;els.height.value=state.h;els.doorDir.value=state.door.dir;els.wallHeight.value=state.wallHeight;els.wallValue.value=state.wallHeight;els.wallThick.value=state.wallThick;els.floorThick.value=state.floorThick;els.roomLabel.textContent=state.name;els.dimensionsLabel.textContent=`${state.w} × ${state.h}`}
+  function resizeGrid(w,h){w=Math.max(4,Math.min(64,Number(w)||4));h=Math.max(4,Math.min(64,Number(h)||4));snapshot();const next=blank(w,h,null);for(let y=0;y<Math.min(h,state.h);y++)for(let x=0;x<Math.min(w,state.w);x++)next[y][x]=state.tiles[y][x];state.w=w;state.h=h;state.tiles=next;if(state.door.x>=w||state.door.y>=h)state.door={x:0,y:Math.max(0,h-1),dir:2};syncControls();fit();renderAll();queueSave()}
+  function gridMetrics(){const rect=els.editor.getBoundingClientRect();const base=Math.max(12,Math.min(42,Math.min((rect.width-90)/state.w,(rect.height-110)/state.h)));return{cell:base*zoom,ox:rect.width/2-state.w*base*zoom/2+pan.x,oy:rect.height/2-state.h*base*zoom/2+pan.y}}
+  function fit(){zoom=1;pan={x:0,y:22};els.zoomValue.textContent='100%'}
+  function resizeCanvas(canvas,context){const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);if(canvas.width!==Math.round(r.width*d)||canvas.height!==Math.round(r.height*d)){canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);context.setTransform(d,0,0,d,0,0)}}
+  function drawEditor(){resizeCanvas(els.editor,ctx);const r=els.editor.getBoundingClientRect(),{cell,ox,oy}=gridMetrics();ctx.clearRect(0,0,r.width,r.height);ctx.save();ctx.translate(.5,.5);for(let y=0;y<state.h;y++)for(let x=0;x<state.w;x++){const v=state.tiles[y][x],px=ox+x*cell,py=oy+y*cell;ctx.fillStyle=v===null?'#0b1118':heightColor(v);ctx.strokeStyle=v===null?'#1a2531':'#304555';ctx.lineWidth=1;ctx.fillRect(px,py,cell-1,cell-1);ctx.strokeRect(px,py,cell-1,cell-1);if(v!==null&&cell>24){ctx.fillStyle=v>15?'#07110f':'#dce9e8';ctx.globalAlpha=.74;ctx.font=`700 ${Math.max(9,cell*.25)}px ui-monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(heightChar(v),px+cell/2,py+cell/2);ctx.globalAlpha=1}if(state.door.x===x&&state.door.y===y){ctx.strokeStyle='#f7c85b';ctx.lineWidth=3;ctx.strokeRect(px+3,py+3,cell-7,cell-7);ctx.fillStyle='#f7c85b';ctx.font=`900 ${Math.max(12,cell*.38)}px sans-serif`;ctx.fillText({0:'↑',2:'→',4:'↓',6:'←'}[state.door.dir]||'→',px+cell/2,py+cell/2)}}ctx.restore()}
+  function heightColor(v){const t=v/32,h=173+55*t,l=29+34*t;return `hsl(${h} 53% ${l}%)`}
+  function drawIso(){resizeCanvas(els.preview,pctx);const r=els.preview.getBoundingClientRect();pctx.clearRect(0,0,r.width,r.height);const tw=Math.max(7,Math.min(24,250/(state.w+state.h))),th=tw*.5,zh=th*.54;const originX=r.width/2+(state.h-state.w)*tw/2*.04,originY=Math.max(42,74-(state.w+state.h)*.4);const faces=[];for(let y=0;y<state.h;y++)for(let x=0;x<state.w;x++){const z=state.tiles[y][x];if(z===null)continue;faces.push({x,y,z,s:x+y})}faces.sort((a,b)=>a.s-b.s||a.x-b.x);for(const t of faces){const ix=originX+(t.x-t.y)*tw/2,iy=originY+(t.x+t.y)*th/2-t.z*zh,depth=Math.max(3,t.z*zh+6);poly(pctx,[[ix,iy],[ix+tw/2,iy+th/2],[ix,iy+th],[ix-tw/2,iy+th/2]],heightColor(t.z),'#0b1217');poly(pctx,[[ix-tw/2,iy+th/2],[ix,iy+th],[ix,iy+th+depth],[ix-tw/2,iy+th/2+depth]],'#1d6b67','#0b1217');poly(pctx,[[ix+tw/2,iy+th/2],[ix,iy+th],[ix,iy+th+depth],[ix+tw/2,iy+th/2+depth]],'#174d51','#0b1217');if(t.x===state.door.x&&t.y===state.door.y){pctx.fillStyle='#f7c85b';pctx.beginPath();pctx.arc(ix,iy+th/2,3.5,0,Math.PI*2);pctx.fill()}}}
+  function poly(c,pts,fill,stroke){c.beginPath();c.moveTo(...pts[0]);pts.slice(1).forEach(p=>c.lineTo(...p));c.closePath();c.fillStyle=fill;c.fill();c.strokeStyle=stroke;c.lineWidth=.7;c.stroke()}
+  function updateStats(){const vals=state.tiles.flat().filter(v=>v!==null),map=displayMap();els.tileCount.textContent=vals.length.toLocaleString();els.levelCount.textContent=new Set(vals).size;els.mapSize.textContent=new Blob([map]).size+' B';els.mapText.value=map;els.roomLabel.textContent=state.name;els.dimensionsLabel.textContent=`${state.w} × ${state.h}`;const v=validateMap(map);els.validation.textContent=v.msg;els.validation.className='validate '+(v.ok?'ok':'bad')}
+  function renderAll(){drawEditor();drawIso();updateStats();syncUndo()}
+  function cellFromEvent(e){const rect=els.editor.getBoundingClientRect(),{cell,ox,oy}=gridMetrics();return{x:Math.floor((e.clientX-rect.left-ox)/cell),y:Math.floor((e.clientY-rect.top-oy)/cell)}}
+  function paintCell(x,y){let changed=false;for(let dy=0;dy<brushSize;dy++)for(let dx=0;dx<brushSize;dx++){const px=x+dx,py=y+dy;if(px<0||py<0||px>=state.w||py>=state.h)continue;const old=state.tiles[py][px];let next=old;if(tool==='draw')next=brush;if(tool==='erase')next=null;if(tool==='raise'&&old!==null)next=Math.min(32,old+1);if(tool==='lower'&&old!==null)next=Math.max(0,old-1);if(tool==='door'&&old!==null){state.door={x:px,y:py,dir:Number(els.doorDir.value)};changed=true;continue}if(next!==old){state.tiles[py][px]=next;changed=true}}if(changed){renderAll();queueSave()}return changed}
+  function beginPaint(e){if(e.button===2||e.button===1){pointer.panning=true;pointer.lastX=e.clientX;pointer.lastY=e.clientY;return}if(e.button!==0)return;pointer.down=true;snapshot();const c=cellFromEvent(e);if(!paintCell(c.x,c.y))history.pop();syncUndo()}
+  function movePaint(e){if(pointer.panning){pan.x+=e.clientX-pointer.lastX;pan.y+=e.clientY-pointer.lastY;pointer.lastX=e.clientX;pointer.lastY=e.clientY;drawEditor();return}if(pointer.down){const c=cellFromEvent(e);paintCell(c.x,c.y)}}
+  function endPaint(){pointer.down=false;pointer.panning=false}
+  function queueSave(){els.saveStatus.textContent='Saving…';clearTimeout(saveTimer);saveTimer=setTimeout(()=>{localStorage.setItem('hablix-room-studio',JSON.stringify(state));els.saveStatus.textContent='Saved locally'},350)}
+  function download(name,content,type='text/plain'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+  function safeName(){return(state.name||'hablix-room').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'hablix-room'}
+  async function copyMap(){try{await navigator.clipboard.writeText(mapString());toast('Floor map copied')}catch{els.mapText.select();document.execCommand('copy');toast('Floor map copied')}}
+  function sqlExport(){const id=Number(els.roomId.value);if(!Number.isInteger(id)||id<1){toast('Enter a valid room ID first');els.roomId.focus();return}const map=mapString().replace(/'/g,"''")+'\\r'+'x'.repeat(state.w);const model=`model_bc_${id}`;const z=state.tiles[state.door.y]?.[state.door.x]??0;const sql=`-- Hablix Room Studio / PlusEMU import\n-- Back up your database before running this script.\nSTART TRANSACTION;\n\nINSERT INTO room_models (id, door_x, door_y, door_z, door_dir, heightmap, custom, wall_height)\nVALUES ('${model}', ${state.door.x}, ${state.door.y}, ${z}, ${state.door.dir}, '${map}', 1, ${state.wallHeight})\nON DUPLICATE KEY UPDATE\n  door_x = VALUES(door_x), door_y = VALUES(door_y), door_z = VALUES(door_z),\n  door_dir = VALUES(door_dir), heightmap = VALUES(heightmap),\n  custom = 1, wall_height = VALUES(wall_height);\n\nUPDATE rooms\nSET model_name = '${model}', wallthick = ${state.wallThick}, floorthick = ${state.floorThick}\nWHERE id = ${id};\n\nCOMMIT;\n`;download(`${safeName()}-room-${id}.sql`,sql,'application/sql');toast('SQL export downloaded')}
+  function projectData(){return{format:'hablix-room-studio',version:1,exportedAt:new Date().toISOString(),room:state}}
+  function template(type){snapshot();const w=state.w,h=state.h;state.tiles=blank(w,h,null);if(type==='square')for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)state.tiles[y][x]=0;if(type==='lounge'){for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)state.tiles[y][x]=(x>Math.floor(w*.55)&&y<Math.floor(h*.55))?2:0}else if(type==='club'){for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)state.tiles[y][x]=y<Math.floor(h/2)?2:0;for(let x=2;x<w-2;x++)state.tiles[Math.floor(h/2)][x]=1}else if(type==='maze'){for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(y%3!==0||x%4===2)state.tiles[y][x]=0}let placed=false;for(let y=h-2;y>=0&&!placed;y--)for(let x=0;x<w;x++)if(state.tiles[y][x]!==null){state.door={x,y,dir:2};placed=true;break}renderAll();queueSave()}
+  function toast(msg){els.toast.textContent=msg;els.toast.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>els.toast.classList.remove('show'),1800)}
+  function setZoom(v){zoom=Math.max(.45,Math.min(2.4,v));els.zoomValue.textContent=Math.round(zoom*100)+'%';drawEditor()}
+  function registerWebMCP(){const mc=document.modelContext;if(!mc?.registerTool)return;const life=new AbortController();const reg=t=>Promise.resolve(mc.registerTool(t,{signal:life.signal})).catch(()=>{});reg({name:'read_room_project',title:'Read room project',description:'Read the current Hablix room dimensions, entrance, and native floor map.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:false},execute:()=>({name:state.name,width:state.w,height:state.h,door:state.door,floorMap:displayMap()})});reg({name:'replace_floor_map',title:'Replace floor map',description:'Validate and replace the current room with a complete PlusEMU floor map.',inputSchema:{type:'object',properties:{floorMap:{type:'string'}},required:['floorMap'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:true},execute:({floorMap})=>{if(typeof floorMap!=='string')throw new Error('floorMap must be a string');loadMap(floorMap);return{ok:true,width:state.w,height:state.h,tiles:state.tiles.flat().filter(v=>v!==null).length}}});reg({name:'set_room_entrance',title:'Set room entrance',description:'Place the room entrance on an existing tile and set direction 0, 2, 4, or 6.',inputSchema:{type:'object',properties:{x:{type:'integer',minimum:0},y:{type:'integer',minimum:0},direction:{type:'integer',enum:[0,2,4,6]}},required:['x','y','direction'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:({x,y,direction})=>{if(!state.tiles[y]||state.tiles[y][x]===null)throw new Error('Entrance must be on an existing tile');snapshot();state.door={x,y,dir:direction};renderAll();queueSave();return{ok:true,door:state.door}}})}
+  $$('.tool[data-tool]').forEach(b=>b.addEventListener('click',()=>{$$('.tool[data-tool]').forEach(x=>x.classList.remove('active'));b.classList.add('active');tool=b.dataset.tool}));
+  $$('.template').forEach(b=>b.addEventListener('click',()=>template(b.dataset.template)));
+  $$('.tabs button').forEach(b=>b.addEventListener('click',()=>{$$('.tabs button').forEach(x=>x.classList.remove('active'));$$('.tab-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#'+b.dataset.tab+'Panel').classList.add('active')}));
+  els.editor.addEventListener('pointerdown',e=>{els.editor.setPointerCapture(e.pointerId);beginPaint(e)});els.editor.addEventListener('pointermove',movePaint);els.editor.addEventListener('pointerup',endPaint);els.editor.addEventListener('pointercancel',endPaint);els.editor.addEventListener('contextmenu',e=>e.preventDefault());els.editor.addEventListener('wheel',e=>{e.preventDefault();setZoom(zoom*(e.deltaY>0?.9:1.1))},{passive:false});
+  els.roomName.addEventListener('input',()=>{state.name=els.roomName.value;renderAll();queueSave()});els.width.addEventListener('change',()=>resizeGrid(els.width.value,state.h));els.height.addEventListener('change',()=>resizeGrid(state.w,els.height.value));els.brushHeight.addEventListener('input',()=>{brush=Number(els.brushHeight.value);els.heightValue.textContent=heightChar(brush)});els.brushSize.addEventListener('change',()=>brushSize=Number(els.brushSize.value));els.doorDir.addEventListener('change',()=>{snapshot();state.door.dir=Number(els.doorDir.value);renderAll();queueSave()});els.wallHeight.addEventListener('input',()=>{state.wallHeight=Number(els.wallHeight.value);els.wallValue.value=state.wallHeight;queueSave()});els.wallThick.addEventListener('change',()=>{state.wallThick=Number(els.wallThick.value);queueSave()});els.floorThick.addEventListener('change',()=>{state.floorThick=Number(els.floorThick.value);queueSave()});
+  $('#undo').addEventListener('click',undo);$('#redo').addEventListener('click',redo);$('#zoomIn').addEventListener('click',()=>setZoom(zoom*1.15));$('#zoomOut').addEventListener('click',()=>setZoom(zoom/1.15));$('#fitView').addEventListener('click',()=>{fit();drawEditor()});$('#copyMap').addEventListener('click',copyMap);$('#copyMap2').addEventListener('click',copyMap);$('#downloadMap').addEventListener('click',()=>download(`${safeName()}.txt`,mapString()));$('#downloadSql').addEventListener('click',sqlExport);$('#downloadProject').addEventListener('click',()=>{download(`${safeName()}.json`,JSON.stringify(projectData(),null,2),'application/json');toast('Project downloaded')});
+  $('#applyMap').addEventListener('click',()=>{try{loadMap(els.mapText.value);toast('Floor map applied')}catch(e){els.validation.textContent=e.message;els.validation.className='validate bad'}});els.mapText.addEventListener('input',()=>{const v=validateMap(els.mapText.value);els.validation.textContent=v.msg;els.validation.className='validate '+(v.ok?'ok':'bad')});
+  $('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every tile in this room?'))return;snapshot();state.tiles=blank(state.w,state.h,null);renderAll();queueSave()});
+  const dialog=$('#importDialog');$('#importBtn').addEventListener('click',()=>dialog.showModal());$('#fileInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;$('#pasteImport').value=await f.text();$('#importType').value=f.name.toLowerCase().endsWith('.json')?'project':'map'});$('#confirmImport').addEventListener('click',e=>{e.preventDefault();try{const raw=$('#pasteImport').value;if($('#importType').value==='project'){const p=JSON.parse(raw);if(p.format!=='hablix-room-studio'||!p.room)throw new Error('That is not a Hablix Room Studio project.');snapshot();state=p.room;syncControls();fit();renderAll();queueSave()}else loadMap(raw);dialog.close();toast('Room imported')}catch(err){$('#importValidation').textContent=err.message;$('#importValidation').className='validate bad'}});
+  $('#libraryToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));$('#inspectorToggle').addEventListener('click',()=>$('#inspector').classList.toggle('open'));
+  addEventListener('keydown',e=>{if(/input|textarea|select/i.test(e.target.tagName))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo();return}const keys={d:'draw',e:'erase',r:'raise',l:'lower',g:'door'};if(keys[e.key.toLowerCase()])document.querySelector(`[data-tool="${keys[e.key.toLowerCase()]}"]`).click()});
+  addEventListener('resize',renderAll);try{const saved=localStorage.getItem('hablix-room-studio');if(saved)state=JSON.parse(saved);else makeInitial()}catch{makeInitial()}syncControls();fit();renderAll();registerWebMCP();
+})();
+</script>
+</body>
+</html>
+
+
