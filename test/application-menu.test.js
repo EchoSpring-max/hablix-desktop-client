@@ -25,3 +25,10 @@ test('room editor includes floor finishes and PlusEMU furniture export', () => {
   assert.match(roomEditorSource, /INSERT INTO items \(base_item, user_id, room_id/);
   assert.match(roomEditorSource, /name:'place_furniture'/);
 });
+
+test('room editor includes an interactive live room viewer', () => {
+  assert.match(roomEditorSource, /id="viewerDialog"/);
+  assert.match(roomEditorSource, /id="liveCanvas"/);
+  assert.match(roomEditorSource, /function drawLive\(\)/);
+  assert.match(roomEditorSource, /Rotate view right/);
+});
