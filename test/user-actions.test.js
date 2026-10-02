@@ -55,11 +55,20 @@ test('menus cover every Nitro user and permission-gated room command', () => {
     .filter(action => action.type === 'command')
     .map(action => action.command);
   assert.deepEqual(userCommands, [
-    ':shake', ':rotate', ':d', 'o/', ':kiss', ':jump', ':idle', '_b', ':flip', ':zoom ', ':sign ',
+    ':shake', ':rotate', ':d', 'o/', ':kiss', ':jump', ':flagme', ':moonwalk', ':superpull',
+    ':superpush', ':transform', ':wordquiz', ':youtube', ':enable 191', ':idle', '_b', ':flip', ':zoom ', ':sign ',
     ':furni', ':chooser', ':togglefps', ':screenshot', ':client'
   ]);
   assert.deepEqual(Object.values(ADMIN_ACTIONS).map(action => action.command), [
     ':pickall', ':ejectall', ':floor', ':bcfloor', ':settings'
   ]);
   assert.match(createUserActionScript('ejectAll'), /:ejectall/);
+});
+
+test('Gold VIP commands from the Hablix catalog are available', () => {
+  assert.deepEqual(
+    ['flagMe', 'moonwalk', 'superPull', 'superPush', 'transform', 'wordQuiz', 'youtube', 'goldEffect']
+      .map(action => USER_ACTIONS[action].command),
+    [':flagme', ':moonwalk', ':superpull', ':superpush', ':transform', ':wordquiz', ':youtube', ':enable 191']
+  );
 });

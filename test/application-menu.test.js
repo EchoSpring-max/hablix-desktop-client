@@ -32,3 +32,10 @@ test('room editor includes an interactive live room viewer', () => {
   assert.match(roomEditorSource, /function drawLive\(\)/);
   assert.match(roomEditorSource, /Rotate view right/);
 });
+
+test('application menu exposes the Gold VIP command dropdown', () => {
+  assert.match(mainSource, /label: 'Gold VIP Commands'/);
+  for (const command of [':flagme', ':moonwalk', ':superpull', ':superpush', ':transform', ':wordquiz', ':youtube', ':enable 191']) {
+    assert.match(mainSource, new RegExp(command.replace(' ', '\\s')));
+  }
+});

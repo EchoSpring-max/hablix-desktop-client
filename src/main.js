@@ -285,6 +285,20 @@ function buildMenu() {
           ]
         },
         {
+          label: 'Gold VIP Commands',
+          submenu: [
+            { label: 'Flag Me (:flagme)', click: () => void runUserAction('flagMe') },
+            { label: 'Moonwalk (:moonwalk)', click: () => void runUserAction('moonwalk') },
+            { label: 'Super Pull (:superpull)', click: () => void runUserAction('superPull') },
+            { label: 'Super Push (:superpush)', click: () => void runUserAction('superPush') },
+            { label: 'Transform (:transform)', click: () => void runUserAction('transform') },
+            { label: 'Word Quiz (:wordquiz)', click: () => void runUserAction('wordQuiz') },
+            { label: 'YouTube (:youtube)', click: () => void runUserAction('youtube') },
+            { type: 'separator' },
+            { label: 'Gold Effect (:enable 191)', click: () => void runUserAction('goldEffect') }
+          ]
+        },
+        {
           label: 'Room View',
           submenu: [
             { label: 'Shake Room (:shake)', click: () => void runUserAction('shake') },
